@@ -3,7 +3,7 @@ import boto3
 import traceback
 import os
 
-MODEL_ID = os.environ.get("MODEL_ID", "anthropic.claude-3-5-sonnet-20240620-v1:0")
+MODEL_ID = os.environ.get("MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-west-2")
 
 ROLE_ARN = "arn:aws:iam::391897533456:role/Bedrock-access"
@@ -138,34 +138,32 @@ FEN, or Forsyth-Edwards Notation, is a standard way to describe the state of a c
    
    **Piece Movement Rules:**
 
-      **1)Pawn:**
-         -A pawn moves only forward and cannot move sideways or backward.
-         -A pawn can move:
-             One square forward if the destination square is unoccupied.
-             Two squares forward on its first move from the starting rank (for Black, this would be from the 7th rank to the 5th rank).
-         -A pawn cannot skip over other pieces.
-         -A pawn can only capture diagonally one square forward to either the left or right (e.g., a pawn on c6 can capture to b5 or d5, not e5).
-         -A pawn cannot move to a square that is not directly forward or diagonally capturing. For example, a pawn on c6 cannot move to e5, as it is not a valid diagonal capture.
-         -En Passant: A pawn can capture an opponent's pawn that has just moved two squares forward from its starting position if it lands next to the capturing pawn.
-
-      **2)Knight:** 
+      1)Pawn:
+         -A pawn cannot move backward. It only moves forward (one square or two squares from its starting position for Black).
+         -Moves forward one square if the destination is unoccupied.
+         -Moves forward two squares from its starting position (2nd rank for Black).
+         -Captures diagonally forward to an adjacent square occupied by an opponent's piece.
+         -En Passant: A pawn can capture an opponent's pawn that has just moved two squares forward from its starting position, landing next to the capturing pawn. This move must occur immediately after the opponent's pawn advances.
+         -Promotes to a queen, rook, bishop, or knight upon reaching the 1st rank.
+   
+      2)Knight: 
          -Moves in an "L" shape: two squares in one direction and one square perpendicular.
          -Can jump over other pieces but cannot land on a square occupied by a piece of the same color.
       
-      **3)Bishop:** 
+      3)Bishop: 
          -Moves any number of squares diagonally.
          -Cannot jump over other pieces.
 
-      **4)Rook:**
+      4)Rook:
          -Moves any number of squares horizontally or vertically.
          -Cannot jump over other pieces.
          -May participate in castling (see castling rules below).
             
-      **5)Queen:**
+      5)Queen:
          -Moves any number of squares horizontally, vertically, or diagonally.
          -Cannot jump over other pieces.
             
-      **6)King:**
+      6)King:
          -Moves one square in any direction.
          
          Castling: 
@@ -342,7 +340,7 @@ HERE is the FEN after White Player Move: {fen}
         
         if not is_move_correct:
             bad_move = body.get('bad_move')
-            input_text += f"You suggested the moves i.e ({bad_move}), but that is incorrect as it violates chess rules. Please reevaluate the position and provide the correct best move for Black."
+            input_text += f"You suggested the move {bad_move}, but that is incorrect as it violates chess rules. Please reevaluate the position and provide the correct best move for Black."
 
 
         # Prepare the request body for Claude model
@@ -383,6 +381,11 @@ HERE is the FEN after White Player Move: {fen}
 
         return {
             'statusCode': 200,
+            'headers': {
+            'Access-Control-Allow-Origin': '*' # Your URL,
+            'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
             'body': json.dumps({
                 'best_move': final_response.get('best_move', ''),
                 'evaluation': final_response.get('evaluation', ''),
@@ -398,6 +401,11 @@ HERE is the FEN after White Player Move: {fen}
 
         return {
             'statusCode': 500,
+            'headers': {
+            'Access-Control-Allow-Origin': '*' # Your URL,
+            'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
             'body': json.dumps({
                 'error': str(e),
                 'message': 'Failed'
