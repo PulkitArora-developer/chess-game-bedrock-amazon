@@ -1,0 +1,19 @@
+<mat-toolbar>
+    <div class="logo-title"> 
+        <img src="assets/logo.svg" width="300px"> 
+        <div *ngIf="username != ''" class="user">Hi, {{username}} | <span  class="logout" (click)="logout()">  Logout</span></div>
+    </div>
+
+
+    
+    <!-- <button mat-button routerLink="/against-friend">
+        Play against friend
+    </button>
+
+    <button mat-button (click)="playAgainstComputer()">
+        Play against computer
+    </button> -->
+
+</mat-toolbar>
+
+<router-outlet></router-outlet>
